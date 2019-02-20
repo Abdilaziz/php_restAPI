@@ -1,6 +1,7 @@
 <?php
 
 header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST");
 header("Content-Type: application/json; charset=UTF-8");
 
 include_once '../config/database.php';
@@ -13,13 +14,31 @@ $product = new Product($db);
 
 // read products
 $stmt = $product->read();
-$num = $stmt->rowCount();
+$num = $product->getRowCount();
 
 if ( $num > 0 ) {
     $products_arr=array();
     $products_arr["records"]=array();
 
 
+    // read data
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+
+        // turns $row['name'] to $name
+        extract($row);
+
+        $product_item = array(
+            "id" => $id,
+            "name" => $name,
+            "description" => html_entity_decode($description),
+            "price" => $price,
+            "category_id" => $category_id,
+            "category_name" => $category_name
+        );
+
+        array_push( $products_arr["records"], $product_item );
+
+    }
 
     http_response_code(200);
 
